@@ -1,0 +1,62 @@
+{
+    "version": "0.2.0",
+    "inputs": [
+        
+    ],
+    "configurations": [
+        {
+            "name": "Debug OrchestratorService",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build OrchestratorService",
+            "program": "${workspaceFolder}/OrchestratorService/bin/Debug/net6.0/OrchestratorService.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/OrchestratorService",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Debug InventoryService",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build InventoryService",
+            "program": "${workspaceFolder}/InventoryService/bin/Debug/net6.0/InventoryService.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/InventoryService",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Debug AccountService",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build AccountService",
+            "program": "${workspaceFolder}/AccountService/bin/Debug/net6.0/AccountService.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/AccountService",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Debug TestPublisher",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build TestPublisher",
+            "program": "${workspaceFolder}/TestPublisher/bin/Debug/net6.0/TestPublisher.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/TestPublisher",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug All Services",
+            "configurations": [
+                "Debug OrchestratorService",
+                "Debug AccountService",
+                "Debug InventoryService"
+            ]
+        }
+    ]
+}

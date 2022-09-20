@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "OrdersBackgroundWorker": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7114",
+      "launchBrowser": false
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+    "IsEncrypted": false,
+  "Values": {
+    "OrdersConnectionString": "{storage-account-connection-string}",
+    "CosmosDBConnectionString": "{cosmos-db-connection-string}",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet"
+  }
+}

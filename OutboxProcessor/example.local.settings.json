@@ -1,0 +1,9 @@
+{
+    "IsEncrypted": false,
+  "Values": {
+    "CosmosDBConnectionString": "{cosmosdb-connection-string}",
+    "ServiceBusConnectionString": "{service-bus-connection-string}",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet"
+  }
+}

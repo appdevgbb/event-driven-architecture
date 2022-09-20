@@ -1,0 +1,9 @@
+{
+    "IsEncrypted": false,
+  "Values": {
+    "ServiceBusConnectionString": "{service-bus-connection-string}",
+    "OrdersConnectionString": "{storage-account-connection-string}",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet"
+  }
+}
