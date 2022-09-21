@@ -10,6 +10,10 @@
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.3" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="local.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
     <None Update="host.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
