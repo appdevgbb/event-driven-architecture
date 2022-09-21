@@ -30,7 +30,7 @@ namespace ClaimCheckProcessor
                         "options", 
                         Route = null)] HttpRequest req,
             [ServiceBus(
-                "orders",
+                "%TopicName%",
                 Connection = "ServiceBusConnectionString",
                 EntityType = ServiceBusEntityType.Topic
             )] IAsyncCollector<ServiceBusMessage> ordersToProcess,
