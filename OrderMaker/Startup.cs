@@ -27,7 +27,6 @@ namespace OrderMaker
             };            
 
             builder.Services.AddSingleton<CosmosClient>(s => new CosmosClient(connectionString, options));
-            //builder.Services.AddSingleton<CosmosClient>(s => new CosmosClient(connectionString));
         }
     }
 }

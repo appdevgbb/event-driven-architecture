@@ -71,7 +71,7 @@ namespace OrderMaker
             using TransactionalBatchResponse batchResponse = await batch.ExecuteAsync();            
             if (batchResponse.IsSuccessStatusCode)
             {
-                Console.WriteLine("Transcational batch succeeded");
+                Console.WriteLine("Transactional batch succeeded");
                 for (var i = 0; i < batchResponse.Count; i++)
                 {
                     var result = batchResponse.GetOperationResultAtIndex<dynamic>(i);
@@ -81,7 +81,7 @@ namespace OrderMaker
             }
             else
             {
-                Console.WriteLine("Transcational batch failed");
+                Console.WriteLine("Transactional batch failed");
                 for (var i = 0; i < batchResponse.Count; i++)
                 {
                     var result = batchResponse.GetOperationResultAtIndex<dynamic>(i);
