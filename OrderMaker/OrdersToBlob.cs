@@ -17,18 +17,14 @@ namespace OrderMaker
     {        
         private static BlobContainerClient client;
 
-        /// <summary>
-        /// This HTTP triggered function will take an incoming request for an
-        /// order and create a file in a blob container for persistence.
-        /// </summary>
-        /// <param name="req">Incoming order request</param>
-        /// <param name="log">Logger</param>
-        /// <returns>The name of the file that was created and saved into a blob container</returns>
         [FunctionName("OrdersToBlob")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
+            // This HTTP triggered function will take an incoming request for an
+            // order and create a file in a blob container for persistence.
+
             // Read the request body and deserialize it into a
             // order created event 
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -39,7 +35,8 @@ namespace OrderMaker
             if (client == null)
             {
                 var connectionString = Environment.GetEnvironmentVariable("OrdersConnectionString");
-                client = new BlobContainerClient(connectionString, "orders");
+                var containerName = Environment.GetEnvironmentVariable("BlobContainerName");
+                client = new BlobContainerClient(connectionString, containerName);
             }
 
             // Create the container, if necessary.

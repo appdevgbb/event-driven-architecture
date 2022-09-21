@@ -8,44 +8,34 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OrderMaker.Models;
+using Microsoft.Azure.Cosmos;
 
 namespace OrderMaker
 {
-    public static class CreateOrder
+    public class CreateOrder
     {
-        /// <summary>
-        /// 
-        /// This HTTP triggered function is invoked with an incoming order request.
-        ///
-        /// After processing the incoming request, CosmosDB output bindings are used
-        /// to insert items into two separate containers:
-        ///    
-        /// 1) An Orders container to persist the details
-        /// 2) An OrdersOutbox container to support a transactional outbox pattern
-        ///    
-        /// References: https://docs.microsoft.com/en-us/azure/architecture/best-practices/transactional-outbox-cosmos          
-        ///    
-        /// </summary>
-        /// <param name="req">Incoming HTTP request</param>
-        /// <param name="orders">Output binding to Orders container</param>
-        /// <param name="ordersCreated">Output binding to OrdersOutbux container</param>
-        /// <param name="log">Logger</param>
-        /// <returns></returns>
+        private readonly CosmosClient _client;
+        private readonly Container _container;
+        
+        public CreateOrder(CosmosClient cosmosClient)
+        { 
+            _client = cosmosClient;
+            
+            var databaseId = Environment.GetEnvironmentVariable("CosmosDBDatabaseId");
+            var containerId = Environment.GetEnvironmentVariable("CosmosDBContainerId");
+            _container = _client.GetContainer(databaseId, containerId);
+        }
+
+
         [FunctionName("CreateOrder")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
-            [CosmosDB(
-                databaseName: "OrdersDatabase",
-                collectionName: "Orders",
-                ConnectionStringSetting = "CosmosDBConnectionString"
-            )] IAsyncCollector<object> orders,
-            [CosmosDB(
-                databaseName: "OrdersDatabase",
-                collectionName: "OrdersOutbox",
-                ConnectionStringSetting = "CosmosDBConnectionString"
-            )] IAsyncCollector<object> ordersCreated,
+        public async Task<IActionResult> Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,     
             ILogger log)
         {
+            // The function will insert two items into a CosmosDB container to support the 
+            // outbox pattern. A transactional batch is used to ensure that both items are
+            // written successfully or not at all. 
+
             log.LogInformation("Incoming order request invoked");
 
             // Read the request body and deserialize it into an
@@ -53,19 +43,52 @@ namespace OrderMaker
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var incomingOrder = JsonConvert.DeserializeObject<Order>(requestBody);
 
-            // Insert Order item
-            await orders.AddAsync(incomingOrder);
+            // Set the ID of the document to the same value as the Order ID
+            incomingOrder.Id = incomingOrder.OrderId;
 
-            // Initialize the order processed property to false
-            // and insert OrderOutbox item
-            var orderCreated = new OrderOutbox { 
+            // Create an order created (outbox) object for the outbox pattern.
+            // The ID of this document must be different that the one for
+            // the order object. The OrderProcessed property is used to identify
+            // orders that have not been published to a mesage bus.
+            var orderCreated = new OrderOutbox
+            {
                 AccountNumber = incomingOrder.AccountNumber,
                 OrderId = incomingOrder.OrderId,
                 Quantity = incomingOrder.Quantity,
+                Id = Guid.NewGuid().ToString(),
                 OrderProcessed = false
             };
-            await ordersCreated.AddAsync(orderCreated);
 
+            // Transactions must share the same partition key and container in Cosmos.
+            // Order ID ('/orderId') is used as the partition key.
+            PartitionKey partitionKey = new PartitionKey(incomingOrder.OrderId);
+
+            // Create and execute the batch with the two items
+            TransactionalBatch batch = _container.CreateTransactionalBatch(partitionKey)
+                .CreateItem<Order>(incomingOrder)
+                .CreateItem<OrderOutbox>(orderCreated);
+
+            using TransactionalBatchResponse batchResponse = await batch.ExecuteAsync();            
+            if (batchResponse.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Transactional batch succeeded");
+                for (var i = 0; i < batchResponse.Count; i++)
+                {
+                    var result = batchResponse.GetOperationResultAtIndex<dynamic>(i);
+                    Console.WriteLine($"Document {i + 1}:");
+                    Console.WriteLine(result.Resource);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Transactional batch failed");
+                for (var i = 0; i < batchResponse.Count; i++)
+                {
+                    var result = batchResponse.GetOperationResultAtIndex<dynamic>(i);
+                    Console.WriteLine($"Document {i + 1}: {result.StatusCode}");
+                }
+            }
+            
 
             return new OkResult();
         }
