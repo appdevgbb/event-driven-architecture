@@ -31,7 +31,7 @@ namespace OutboxProcessor
                 databaseName: "%CosmosDBDatabaseName%",
                 collectionName: "%CosmosDBCollectionName%",
                 ConnectionStringSetting = "CosmosDBConnectionString",
-                SqlQuery = "select * from OrdersCreated r where r.orderProcessed = false")] IEnumerable<Document> ordersCreated,
+                SqlQuery = "select * from Orders r where r.orderProcessed = false")] IEnumerable<Document> ordersCreated,
             [CosmosDB(
                 databaseName: "%CosmosDBDatabaseName%",
                 collectionName: "%CosmosDBCollectionName%",
@@ -44,9 +44,9 @@ namespace OutboxProcessor
             )] IAsyncCollector<ServiceBusMessage> ordersToProcess,
             ILogger log)
         {
-            /// This function is triggered off the change feed in CosmosDB. When 
-            /// new items are added to the orders container, it will be invoked 
-            /// so that the outbox transaction can be completed.
+            // This function is triggered off the change feed in CosmosDB. When 
+            // new items are added to the orders container, it will be invoked 
+            // so that the outbox transaction can be completed.
 
             if (input != null && input.Count > 0)
             {
